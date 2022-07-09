@@ -5,7 +5,6 @@ from consultas import *
 
 
 class Ventana(tk.Frame):
-
     cadena_consulta = Consultas()
 
     def __init__(self, master=None):
@@ -15,6 +14,7 @@ class Ventana(tk.Frame):
         self.combo_quincena = None
         self.combo_pago_quincena = None
         self.texto_monto = None
+        self.id = -1
 
         self.fecha_var = None
         self.quincena_var = None
@@ -46,15 +46,44 @@ class Ventana(tk.Frame):
         datos = self.cadena_consulta.consulta_registros()
         for row in datos:
             self.grid_recibo.insert("", tk.END, text=row[0], values=(row[1], row[2], row[3], row[4]))
+        if len(self.grid_recibo.get_children()) > 0:
+            self.grid_recibo.selection_set(self.grid_recibo.get_children()[-1])
 
     def guardar_recibo(self):
-        self.cadena_consulta.agrega_recibo(self.combo_quincena.get(), self.texto_fecha.get(), self.texto_monto.get(),
-                                           self.combo_pago_quincena.get())
-        self.limpiar_cajas()
+        if self.id == -1:
+            self.cadena_consulta.agrega_recibo(self.combo_quincena.get(), self.texto_fecha.get(),
+                                               self.texto_monto.get(),
+                                               self.combo_pago_quincena.get())
+            messagebox.showinfo("Guardando registro", "Se ha guardado correctamente el registro")
+            self.limpiar_cajas()
+            self.cargar_recibo()
+        else:
+            print(self.texto_fecha.get())
+            self.cadena_consulta.actualiza_datos(self.id, self.combo_quincena.get(),
+                                                 self.cadena_consulta.regresa_fecha(self.texto_fecha.get()),
+                                                 self.texto_monto.get(), self.combo_pago_quincena.get())
+            self.id = -1
+            messagebox.showinfo("Actualizando registro", "Se ha actualizado el registro correctamente")
+
+        self.limpia_grid()
         self.cargar_recibo()
 
     def actualizar_recibo(self):
-        pass
+        selected = self.grid_recibo.focus()
+        clave = self.grid_recibo.item(selected, 'text')
+
+        if clave == '':
+            messagebox.showwarning("Modificando registro", "Debes de seleccionar un registro")
+        else:
+            self.limpiar_cajas()
+            self.id = clave
+            valores = self.grid_recibo.item(selected, 'values')
+            print(valores[1])
+            self.texto_fecha.insert(0, self.cadena_consulta.regresa_fecha(valores[1]))
+            print(self.cadena_consulta.regresa_fecha(valores[1]))
+            self.combo_quincena.set(valores[0])
+            self.texto_monto.insert(0, valores[2])
+            self.combo_pago_quincena.set(valores[3])
 
     def eliminar_recibo(self):
         selected = self.grid_recibo.focus()
@@ -76,6 +105,8 @@ class Ventana(tk.Frame):
                     self.cargar_recibo()
                 else:
                     messagebox.showwarning('Eliminando registro', 'No se eliminó el registro')
+
+            self.limpiar_cajas()
 
     def limpiar_cajas(self):
         self.limpiar()
@@ -125,7 +156,7 @@ class Ventana(tk.Frame):
         numvalores = [1, 2, 3]
 
         self.combo_pago_quincena = ttk.Combobox(frame_01, textvariable=self.numquincena_var, width=14, state='readonly',
-                                           values=numvalores)
+                                                values=numvalores)
         self.combo_pago_quincena.place(x=120, y=105)
         self.combo_pago_quincena.set(numvalores[0])
 
