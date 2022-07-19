@@ -1,16 +1,19 @@
-import sqlite3
+import datetime
+import mysql.connector
 
 
 class Consultas:
 
     def __init__(self):
-        self.conexion = sqlite3.connect("BDRecibos")
+
+        self.conexion = mysql.connector.connect(host="localhost", user="root", password="", database="BDRecibos")
 
         self.year = None
         self.mes = None
         self.dia = None
         self.nueva_fecha = None
-        self.fecha_modificada = None
+        self.nueva_fecha_02 = None
+        self.fecha_sin = None
 
     def __str__(self):
         datos = self.consulta_registros()
@@ -26,16 +29,24 @@ class Consultas:
         self.year = fecha[6:10]
         self.mes = fecha[3:5]
         self.dia = fecha[0:2]
-        self.nueva_fecha = "'" + self.year + '-' + self.mes + '-' + self.dia + "'"
+        self.nueva_fecha = "'" + self.year + "-" + self.mes + "-" + self.dia + "'"
         return self.nueva_fecha
 
-# TODO Falta revisar la longitud de la cadena, para recuperar el formato inicial de fecha
     def regresa_fecha(self, fecha):
-        self.year = fecha[1:5]
-        self.mes = fecha[6:8]
-        self.dia = fecha[9:11]
-        self.fecha_modificada = self.dia + '-' + self.mes + '-' + self.year
-        return self.fecha_modificada
+        self.year = fecha[0:4]
+        self.mes = fecha[5:7]
+        self.dia = fecha[8:10]
+        self.nueva_fecha_02 = "'" + self.dia + "-" + self.mes + "-" + self.year + "'"
+        return self.nueva_fecha_02
+
+    def quita_comillas(self, fecha_sin):
+        self.year = fecha_sin[0:4]
+        self.mes = fecha_sin[5:7]
+        self.dia = fecha_sin[8:10]
+        print(self.year, self.mes, self.dia)
+        self.fecha_sin = self.dia + "-" + self.mes + "-" + self.year
+        print(self.fecha_sin)
+        return self.fecha_sin
 
     def consulta_registros(self):
         cur = self.conexion.cursor()
@@ -52,12 +63,12 @@ class Consultas:
 
         cur = self.conexion.cursor()
         nueva_fecha = self.define_fecha(fecha)
+        print(nueva_fecha, type(nueva_fecha))
 
         cadena_sql = 'INSERT INTO recibos VALUES (NULL, {0:}, {1:}, {2:}, {3:})'.format(quincena, nueva_fecha, monto,
                                                                                         num_quincena)
         cur.execute(cadena_sql)
         self.conexion.commit()
-        # self.fetch_data()
         cur.close()
 
     def elimina_recibo(self, clave: object) -> object:
@@ -73,24 +84,7 @@ class Consultas:
         cur = self.conexion.cursor()
         cadena2_sql = 'UPDATE recibos SET quincena={0:}, fecha={1:}, monto={2:}, qmes={3:} WHERE id={4:}'.format(
             quincena, fecha, monto, numquincena, clave)
-        print(cadena2_sql)
         cur.execute(cadena2_sql)
         n = cur.rowcount
         self.conexion.commit()
         cur.close()
-
-
-    # def fetch_data(self):
-    #     conexion = sqlite3.connect("BDRecibos")
-    #     cursor = conexion.cursor()
-    #     cursor.execute('SELECT id, quincena, fecha, monto, qmes FROM recibos ORDER BY fecha ASC')
-    #     rows = cursor.fetchall()
-    #     if len(rows) != 0:
-    #         for row in rows:
-    #             self.recibo_tabla.insert('', END, values=row)
-    #
-    #
-    #
-    #
-    #
-    #

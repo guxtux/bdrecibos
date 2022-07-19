@@ -21,7 +21,7 @@ def regresa_fecha(fecha):
     return fecha_modificada
 
 
-a = define_fecha("23/07/2019")
+a = define_fecha("12-07-2022")
 
 print(a)
 

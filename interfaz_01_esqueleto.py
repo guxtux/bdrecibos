@@ -15,6 +15,7 @@ class Ventana(tk.Frame):
         self.combo_pago_quincena = None
         self.texto_monto = None
         self.id = -1
+        self.fecha_sin_comillas = None
 
         self.fecha_var = None
         self.quincena_var = None
@@ -56,14 +57,13 @@ class Ventana(tk.Frame):
                                                self.combo_pago_quincena.get())
             messagebox.showinfo("Guardando registro", "Se ha guardado correctamente el registro")
             self.limpiar_cajas()
-            self.cargar_recibo()
         else:
-            print(self.texto_fecha.get())
             self.cadena_consulta.actualiza_datos(self.id, self.combo_quincena.get(),
-                                                 self.cadena_consulta.regresa_fecha(self.texto_fecha.get()),
+                                                 self.cadena_consulta.define_fecha(self.texto_fecha.get()),
                                                  self.texto_monto.get(), self.combo_pago_quincena.get())
             self.id = -1
             messagebox.showinfo("Actualizando registro", "Se ha actualizado el registro correctamente")
+            self.limpiar_cajas()
 
         self.limpia_grid()
         self.cargar_recibo()
@@ -78,9 +78,7 @@ class Ventana(tk.Frame):
             self.limpiar_cajas()
             self.id = clave
             valores = self.grid_recibo.item(selected, 'values')
-            print(valores[1])
-            self.texto_fecha.insert(0, self.cadena_consulta.regresa_fecha(valores[1]))
-            print(self.cadena_consulta.regresa_fecha(valores[1]))
+            self.texto_fecha.insert(0, self.cadena_consulta.quita_comillas(valores[1]))
             self.combo_quincena.set(valores[0])
             self.texto_monto.insert(0, valores[2])
             self.combo_pago_quincena.set(valores[3])
@@ -98,7 +96,6 @@ class Ventana(tk.Frame):
 
             if r == messagebox.YES:
                 n = self.cadena_consulta.elimina_recibo(clave)
-                print(n)
                 if n == 1:
                     messagebox.showinfo('Eliminando registro', 'Elemento eliminado de manera correcta')
                     self.limpia_grid()
@@ -111,6 +108,8 @@ class Ventana(tk.Frame):
     def limpiar_cajas(self):
         self.limpiar()
         self.texto_fecha.focus()
+
+# falta un botón nuevo registro para que desbloquee las cajas y habilite los botones
 
     def obtiene_cursor(self):
         selected = self.grid_recibo.focus()
