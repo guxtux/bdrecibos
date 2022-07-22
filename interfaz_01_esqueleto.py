@@ -8,7 +8,7 @@ class Ventana(tk.Frame):
     cadena_consulta = Consultas()
 
     def __init__(self, master=None):
-        super().__init__(master, width=600, height=600)
+        super().__init__(master, width=600, height=475)
 
         self.texto_fecha = None
         self.combo_quincena = None
@@ -22,16 +22,21 @@ class Ventana(tk.Frame):
         self.numquincena_var = None
         self.monto_var = None
 
+        self.boton_nuevo = None
         self.boton_guardar = None
         self.boton_actualizar = None
         self.boton_eliminar = None
         self.boton_limpiar = None
+        self.boton_cancelar = None
         self.grid_recibo = None
+        self.boton_salir = None
 
         self.master = master
         self.pack()
         self.inicializar_gui()
         self.cargar_recibo()
+        self.habilitar_cajas("disabled")
+        self.habilitar_botones("disabled")
 
     def limpiar(self):
         self.texto_fecha.delete(0, tk.END)
@@ -42,6 +47,12 @@ class Ventana(tk.Frame):
     def limpia_grid(self):
         for item in self.grid_recibo.get_children():
             self.grid_recibo.delete(item)
+
+    def nuevo_registro(self):
+        self.habilitar_cajas("normal")
+        self.boton_actualizar['state'] = "disabled"
+        self.boton_limpiar['state'] = "normal"
+        self.boton_guardar['state'] = "normal"
 
     def cargar_recibo(self):
         datos = self.cadena_consulta.consulta_registros()
@@ -69,8 +80,14 @@ class Ventana(tk.Frame):
         self.cargar_recibo()
 
     def actualizar_recibo(self):
+
         selected = self.grid_recibo.focus()
         clave = self.grid_recibo.item(selected, 'text')
+
+        self.habilitar_cajas("normal")
+        self.boton_nuevo['state'] = "disabled"
+        self.boton_guardar['state'] = "normal"
+        self.boton_eliminar['state'] = "normal"
 
         if clave == '':
             messagebox.showwarning("Modificando registro", "Debes de seleccionar un registro")
@@ -84,6 +101,7 @@ class Ventana(tk.Frame):
             self.combo_pago_quincena.set(valores[3])
 
     def eliminar_recibo(self):
+
         selected = self.grid_recibo.focus()
         clave = self.grid_recibo.item(selected, 'text')
 
@@ -105,11 +123,32 @@ class Ventana(tk.Frame):
 
             self.limpiar_cajas()
 
+        self.habilitar_cajas("disabled")
+        self.boton_nuevo['state'] = "normal"
+        self.boton_guardar['state'] = "disabled"
+        self.boton_eliminar['state'] = "disabled"
+
     def limpiar_cajas(self):
         self.limpiar()
         self.texto_fecha.focus()
 
-# falta un botón nuevo registro para que desbloquee las cajas y habilite los botones
+    # falta un botón nuevo registro para que desbloquee las cajas y habilite los botones
+    def habilitar_cajas(self, estado):
+        self.texto_fecha.configure(state=estado)
+        self.texto_monto.configure(state=estado)
+        self.combo_quincena.configure(state=estado)
+        self.combo_pago_quincena.configure(state=estado)
+
+    def habilitar_botones(self, estado):
+        self.boton_guardar.configure(state=estado)
+        self.boton_limpiar.configure(state=estado)
+        self.boton_eliminar.configure(state=estado)
+
+    def cancela_tarea(self):
+        self.habilitar_cajas("disabled")
+        self.habilitar_botones("disabled")
+        self.boton_actualizar['state'] = "normal"
+        self.boton_nuevo['state'] = "normal"
 
     def obtiene_cursor(self):
         selected = self.grid_recibo.focus()
@@ -168,22 +207,38 @@ class Ventana(tk.Frame):
         frame_02 = tk.Frame(self, bd=4, bg="#f0f838", width=300, height=220)
         frame_02.place(x=300, y=0)
 
-        self.boton_guardar = tk.Button(frame_02, bd=4, text="Guardar", width=13, height=2,
-                                       command=self.guardar_recibo, bg="#96c0eb")
-        self.boton_guardar.place(x=50, y=10)
+        self.boton_nuevo = tk.Button(frame_02, bd=4, text="Nuevo", width=13, height=2, bg="aquamarine",
+                                     activebackground="green", activeforeground="white", command=self.nuevo_registro)
+        self.boton_nuevo.place(x=40, y=5)
+
+        self.boton_guardar = tk.Button(frame_02, bd=4, text="Guardar", width=13, height=2, bg="dark orange",
+                                       activebackground="green", activeforeground="white", command=self.guardar_recibo)
+        self.boton_guardar.place(x=40, y=55)
 
         self.boton_actualizar = tk.Button(frame_02, bd=4, text="Actualizar", width=13, height=2,
+                                          bg="maroon1", activebackground="green", activeforeground="white",
                                           command=self.actualizar_recibo)
-        self.boton_actualizar.place(x=50, y=55)
+        self.boton_actualizar.place(x=40, y=105)
 
-        self.boton_eliminar = tk.Button(frame_02, bd=4, text="Eliminar", width=13, height=2,
+        self.boton_eliminar = tk.Button(frame_02, bd=4, text="Eliminar", width=13, height=2, bg="firebrick1",
+                                        activebackground="green", activeforeground="white",
                                         command=self.eliminar_recibo)
-        self.boton_eliminar.place(x=50, y=100)
+        self.boton_eliminar.place(x=160, y=5)
 
-        self.boton_limpiar = tk.Button(frame_02, bd=4, text="Limpiar", width=13, height=2, command=self.limpiar_cajas)
-        self.boton_limpiar.place(x=50, y=145)
+        self.boton_limpiar = tk.Button(frame_02, bd=4, text="Limpiar", width=13, height=2, bg="orchid1",
+                                       activebackground="green", activeforeground="white", command=self.limpiar_cajas)
+        self.boton_limpiar.place(x=160, y=55)
 
-        frame_03 = tk.Frame(self, bd=4, bg="#e5c377", width=600, height=300)
+        self.boton_cancelar = tk.Button(frame_02, bd=4, text="Cancelar", width=13, height=2, bg="salmon2",
+                                        activebackground="green", activeforeground="white",
+                                        command=self.cancela_tarea)
+        self.boton_cancelar.place(x=160, y=105)
+
+        self.boton_salir = tk.Button(frame_02, bd=4, text="Salir", width=13, height=2, bg="tomato",
+                                     activebackground="green", activeforeground="white")
+        self.boton_salir.place(x=160, y=155)
+
+        frame_03 = tk.Frame(self, bd=4, bg="DarkOliveGreen1", width=600, height=100)
         frame_03.place(x=0, y=220)
 
         self.grid_recibo = ttk.Treeview(frame_03, columns=("Quincena", "Fecha", "Monto", "Pago quincena"))
@@ -208,3 +263,4 @@ class Ventana(tk.Frame):
         sb.pack(side=tk.RIGHT, fill=tk.Y)
         self.grid_recibo.config(yscrollcommand=sb.set)
         sb.config(command=self.grid_recibo.yview)
+
