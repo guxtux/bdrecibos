@@ -53,6 +53,7 @@ class Ventana(tk.Frame):
         self.boton_actualizar['state'] = "disabled"
         self.boton_limpiar['state'] = "normal"
         self.boton_guardar['state'] = "normal"
+        self.boton_nuevo['state'] = "disabled"
 
     def cargar_recibo(self):
         datos = self.cadena_consulta.consulta_registros()
@@ -164,6 +165,9 @@ class Ventana(tk.Frame):
         # self.monto_var.set(row[3])
         # self.numquincena_var.set(row[4])
 
+    def cerrar_gui(self):
+        self.quit()
+
     def inicializar_gui(self):
 
         frame_01 = tk.Frame(self, bd=4, bg="#a3d1f0", width=300, height=220)
@@ -235,7 +239,7 @@ class Ventana(tk.Frame):
         self.boton_cancelar.place(x=160, y=105)
 
         self.boton_salir = tk.Button(frame_02, bd=4, text="Salir", width=13, height=2, bg="tomato",
-                                     activebackground="green", activeforeground="white")
+                                     activebackground="green", activeforeground="white", command=self.cerrar_gui)
         self.boton_salir.place(x=160, y=155)
 
         frame_03 = tk.Frame(self, bd=4, bg="DarkOliveGreen1", width=600, height=100)

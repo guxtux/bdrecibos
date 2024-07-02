@@ -6,7 +6,8 @@ class Consultas:
 
     def __init__(self):
 
-        self.conexion = mysql.connector.connect(host="localhost", user="root", password="", database="BDRecibos")
+        self.conexion = mysql.connector.connect(host="localhost", user="root", password="admingus_$2024",
+                                                database="BDRecibos")
 
         self.year = None
         self.mes = None
